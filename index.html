@@ -1,209 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timer with Results</title>
-    <style>
-        body {
-            margin: 0;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.8), rgba(0, 0, 0, 0.9));
-        }
-
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        .container {
-            z-index: 10;
-            text-align: center;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
-
-        .text {
-            font-size: 1.8em;
-            margin-bottom: 20px;
-        }
-
-        .button-container {
-            margin-top: 20px;
-        }
-
-        button {
-            padding: 15px 30px;
-            font-size: 16px;
-            background: gold;
-            color: black;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        button:hover {
-            background: darkgoldenrod;
-        }
-
-        .history {
-            margin-top: 30px;
-            text-align: center;
-        }
-
-        .history div {
-            margin-bottom: 5px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML Timer and Particles</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      display: block;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      color: white;
+    }
+    #controls button, #controls div {
+      margin-bottom: 10px;
+    }
+    #textview4, #textview6 {
+      color: white;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 <body>
-    <canvas id="particles"></canvas>
-    <div class="container">
-        <div id="textview4" class="text"></div>
-        <div id="textview6" class="text"></div>
-        <div class="button-container">
-            <button id="generateButton">Tap to Generate</button>
-        </div>
-        <div id="result" class="text"></div>
-        <div id="history" class="history"></div>
-    </div>
+  <canvas id="particleCanvas"></canvas>
+  <div id="controls">
+    <div id="textview4">Timer Data</div>
+    <div id="textview6">Timer</div>
+    <button id="randomButton">Show Random Result</button>
+    <div id="randomResult"></div>
+  </div>
 
-    <!-- Lottie Animation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.0/lottie.min.js"></script>
+  <script>
+    // Full-color particles animation
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-    <script>
-        // Particle Effect
-        const canvas = document.getElementById("particles");
-        const ctx = canvas.getContext("2d");
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        let particlesArray = [];
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 5 + 1;
-                this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
-                this.speedX = Math.random() * 3 - 1.5;
-                this.speedY = Math.random() * 3 - 1.5;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.size > 0.2) this.size -= 0.1;
-            }
-            draw() {
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
+    let particles = [];
+    class Particle {
+      constructor(x, y, dx, dy, radius) {
+        this.x = x;
+        this.y = y;
+        this.dx = dx;
+        this.dy = dy;
+        this.radius = radius;
+        this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+      }
+      update() {
+        if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+          this.dx = -this.dx;
         }
-
-        function handleParticles() {
-            for (let i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
-                particlesArray[i].draw();
-
-                for (let j = i; j < particlesArray.length; j++) {
-                    const dx = particlesArray[i].x - particlesArray[j].x;
-                    const dy = particlesArray[i].y - particlesArray[j].y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < 100) {
-                        ctx.beginPath();
-                        ctx.strokeStyle = particlesArray[i].color;
-                        ctx.lineWidth = 0.2;
-                        ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
-                        ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
-                        ctx.stroke();
-                    }
-                }
-
-                if (particlesArray[i].size <= 0.3) {
-                    particlesArray.splice(i, 1);
-                    i--;
-                }
-            }
+        if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+          this.dy = -this.dy;
         }
+        this.x += this.dx;
+        this.y += this.dy;
+        this.draw();
+      }
+    }
 
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            handleParticles();
-            requestAnimationFrame(animate);
-        }
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < 100; i++) {
+        const radius = Math.random() * 3 + 1;
+        const x = Math.random() * (canvas.width - radius * 2) + radius;
+        const y = Math.random() * (canvas.height - radius * 2) + radius;
+        const dx = (Math.random() - 0.5) * 2;
+        const dy = (Math.random() - 0.5) * 2;
+        particles.push(new Particle(x, y, dx, dy, radius));
+      }
+    }
 
-        window.addEventListener("click", () => {
-            for (let i = 0; i < 10; i++) {
-                particlesArray.push(new Particle());
-            }
-        });
+    function animateParticles() {
+      requestAnimationFrame(animateParticles);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(particle => particle.update());
+    }
 
-        animate();
+    initParticles();
+    animateParticles();
 
-        // Timer Logic
-        const textview4 = document.getElementById("textview4");
-        const textview6 = document.getElementById("textview6");
-        const resultDiv = document.getElementById("result");
-        const historyDiv = document.getElementById("history");
-        const generateButton = document.getElementById("generateButton");
+    // Timer Functionality
+    const textview4 = document.getElementById('textview4');
+    const textview6 = document.getElementById('textview6');
+    const randomResult = document.getElementById('randomResult');
+    const randomButton = document.getElementById('randomButton');
 
-        const timer = setInterval(() => {
-            const calendar = new Date();
-            const seconds = calendar.getSeconds();
-            const remainingSeconds = 60 - seconds;
-            const minutes = calendar.getMinutes();
-            const totalMinutes = calendar.getHours() * 60 + minutes;
+    function updateTimer() {
+      const now = new Date();
+      const seconds = now.getUTCSeconds();
+      const remainingSeconds = 60 - seconds;
+      const minutes = now.getUTCMinutes();
+      const totalMinutes = now.getUTCHours() * 60 + minutes;
 
-            textview4.textContent = `${calendar.getFullYear()}${String(calendar.getMonth() + 1).padStart(2, "0")}${String(calendar.getDate()).padStart(2, "0")}1000${10001 + totalMinutes}`;
-            textview6.textContent = `   00  :  ${String(remainingSeconds).padStart(2, "0")}`;
-        }, 1000);
+      // Update period number
+      textview4.textContent = `${now.toISOString().split('T')[0].replace(/-/g, '')}1000${10001 + totalMinutes}`;
 
-        let periodResults = {};
+      // Update timer
+      textview6.textContent = `   ${remainingSeconds.toString().padStart(2, '0')}  :  ${remainingSeconds.toString().padStart(2, '0')}`.replaceAll(
+        /(?<=\d)(?=\d)/g,
+        ' '
+      );
+    }
 
-        // Generate Button Logic
-        generateButton.addEventListener("click", () => {
-            const lottieContainer = document.createElement("div");
-            lottieContainer.style.position = "fixed";
-            lottieContainer.style.top = "50%";
-            lottieContainer.style.left = "50%";
-            lottieContainer.style.transform = "translate(-50%, -50%)";
-            lottieContainer.style.width = "200px";
-            lottieContainer.style.height = "200px";
-            document.body.appendChild(lottieContainer);
+    setInterval(updateTimer, 1000);
 
-            const animation = lottie.loadAnimation({
-                container: lottieContainer,
-                renderer: "svg",
-                loop: false,
-                autoplay: true,
-                path: "https://assets2.lottiefiles.com/packages/lf20_rnq6slxu.json"
-            });
+    // Button to show random result
+    randomButton.addEventListener('click', () => {
+      const randomSize = Math.random() > 0.5 ? 'Big' : 'Small';
+      randomResult.textContent = `Random Result: ${randomSize}`;
+      randomResult.style.fontSize = randomSize === 'Big' ? '30px' : '15px';
 
-            animation.addEventListener("complete", () => {
-                document.body.removeChild(lottieContainer);
-                const result = Math.random() > 0.5 ? "Big" : "Small";
-                const period = textview4.textContent;
-
-                if (!periodResults[period]) {
-                    periodResults[period] = result;
-                    resultDiv.textContent = `Result: ${result}`;
-                    const historyItem = document.createElement("div");
-                    historyItem.textContent = `Period ${period}: ${result}`;
-                    historyDiv.appendChild(historyItem);
-                } else {
-                    alert("Result for this period has already been generated.");
-                }
-            });
-        });
-    </script>
+      // Update result every minute
+      setInterval(() => {
+        const newSize = Math.random() > 0.5 ? 'Big' : 'Small';
+        randomResult.textContent = `Random Result: ${newSize}`;
+        randomResult.style.fontSize = newSize === 'Big' ? '30px' : '15px';
+      }, 60000);
+    });
+  </script>
 </body>
 </html>
