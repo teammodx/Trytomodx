@@ -1,201 +1,202 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wingo Results</title>
-  <style>
-    /* Fullscreen setup */
-    body, html {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: black;
-      font-family: Arial, sans-serif;
-      color: white;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timer App</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle, rgba(255,215,0,0.8), rgba(0,0,0,0.9));
+            overflow: hidden;
+        }
 
-    canvas {
-      display: block;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 1;
-    }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
 
-    .content {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-      text-align: center;
-    }
+        .container {
+            z-index: 10;
+            text-align: center;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
 
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 20px;
-    }
+        .timer-text {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
 
-    .result {
-      font-size: 1.5rem;
-      margin: 20px 0;
-    }
+        .result-text {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
 
-    .history {
-      max-height: 150px;
-      overflow-y: auto;
-      border-top: 1px solid rgba(255, 255, 255, 0.2);
-      padding-top: 10px;
-      margin-top: 20px;
-      font-size: 1rem;
-      width: 80%;
-      background: rgba(0, 0, 0, 0.5);
-      border-radius: 10px;
-      padding: 10px;
-    }
+        .history {
+            margin-top: 20px;
+        }
 
-    #lottie-fire {
-      position: absolute;
-      bottom: 10%;
-      width: 300px;
-      height: 300px;
-    }
-  </style>
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: gold;
+            border: none;
+            color: black;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: darkgoldenrod;
+        }
+    </style>
 </head>
 <body>
-  <!-- Canvas for particles -->
-  <canvas id="particles"></canvas>
-
-  <!-- Main Content -->
-  <div class="content">
-    <h1>Wingo Auto Results</h1>
-    <div class="result">
-      <span id="result">Waiting for results...</span>
+    <canvas id="particles"></canvas>
+    <div class="container">
+        <div id="textview4" class="timer-text"></div>
+        <div id="textview6" class="timer-text"></div>
+        <button id="generateResult">Generate Result</button>
+        <div id="result" class="result-text"></div>
+        <div class="history" id="history"></div>
     </div>
-    <div class="history" id="history">
-      <h3>History</h3>
-    </div>
-    <!-- Lottie Animation -->
-    <div id="lottie-fire"></div>
-  </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.14/lottie.min.js"></script>
-  <script>
-    // Particle Background
-    const canvas = document.getElementById('particles');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    <!-- Add Lottie Animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.0/lottie.min.js"></script>
 
-    let particlesArray = [];
-    const maxParticles = 200;
+    <script>
+        // Particle Background
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-    class Particle {
-      constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 3 + 1;
-        this.speedX = Math.random() * 2 - 1;
-        this.speedY = Math.random() * 2 - 1;
-        this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
-      }
+        let particlesArray = [];
 
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 5 + 1;
+                this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                this.speedX = Math.random() * 3 - 1.5;
+                this.speedY = Math.random() * 3 - 1.5;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
 
-        // Bounce off edges
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-      }
-
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-        ctx.closePath();
-      }
-    }
-
-    function initParticles() {
-      particlesArray = [];
-      for (let i = 0; i < maxParticles; i++) {
-        particlesArray.push(new Particle());
-      }
-    }
-
-    function animateParticles() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (let particle of particlesArray) {
-        particle.update();
-        particle.draw();
-      }
-
-      // Draw connecting lines
-      for (let i = 0; i < particlesArray.length; i++) {
-        for (let j = i; j < particlesArray.length; j++) {
-          const dx = particlesArray[i].x - particlesArray[j].x;
-          const dy = particlesArray[i].y - particlesArray[j].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < 120) {
-            ctx.beginPath();
-            ctx.strokeStyle = 'rgba(255, 215, 0, 0.3)';
-            ctx.lineWidth = 0.5;
-            ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
-            ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
-            ctx.stroke();
-            ctx.closePath();
-          }
+                if (this.size > 0.2) this.size -= 0.1;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
-      }
 
-      requestAnimationFrame(animateParticles);
-    }
+        function handleParticles() {
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
 
-    // Results Logic
-    const resultElement = document.getElementById('result');
-    const historyElement = document.getElementById('history');
+                for (let j = i; j < particlesArray.length; j++) {
+                    const dx = particlesArray[i].x - particlesArray[j].x;
+                    const dy = particlesArray[i].y - particlesArray[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = particlesArray[i].color;
+                        ctx.lineWidth = 0.2;
+                        ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
+                        ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
+                        ctx.stroke();
+                    }
+                }
 
-    function updateResults() {
-      const period = Math.floor(Math.random() * 10000) + 1;
-      const result = Math.random() > 0.5 ? 'BIG' : 'SMALL';
+                if (particlesArray[i].size <= 0.3) {
+                    particlesArray.splice(i, 1);
+                    i--;
+                }
+            }
+        }
 
-      const newResult = `Period: ${period}, Result: ${result}`;
-      resultElement.textContent = newResult;
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            handleParticles();
+            requestAnimationFrame(animate);
+        }
 
-      const historyItem = document.createElement('div');
-      historyItem.textContent = newResult;
-      historyElement.prepend(historyItem);
-    }
+        window.addEventListener('click', () => {
+            for (let i = 0; i < 10; i++) {
+                particlesArray.push(new Particle());
+            }
+        });
 
-    setInterval(updateResults, 60000); // Update results every 60 seconds
+        animate();
 
-    // Load Lottie Animation
-    lottie.loadAnimation({
-      container: document.getElementById('lottie-fire'),
-      renderer: 'svg',
-      loop: true,
-      autoplay: true,
-      path: 'https://assets10.lottiefiles.com/packages/lf20_2vcjzoji.json' // Fire animation
-    });
+        // Timer and Results Logic
+        const textview4 = document.getElementById('textview4');
+        const textview6 = document.getElementById('textview6');
+        const resultDiv = document.getElementById('result');
+        const historyDiv = document.getElementById('history');
+        const generateButton = document.getElementById('generateResult');
 
-    // Resize Event
-    window.addEventListener('resize', () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      initParticles();
-    });
+        const timer = setInterval(() => {
+            const calendar = new Date();
+            const seconds = calendar.getSeconds();
+            const remainingSeconds = 60 - seconds;
+            const minutes = calendar.getMinutes();
+            const totalMinutes = calendar.getHours() * 60 + minutes;
 
-    // Initialize
-    initParticles();
-    animateParticles();
-  </script>
+            textview4.textContent = `${calendar.getFullYear()}${String(calendar.getMonth() + 1).padStart(2, '0')}${String(calendar.getDate()).padStart(2, '0')}1000${10001 + totalMinutes}`;
+            textview6.textContent = `   00  :  ${String(remainingSeconds).padStart(2, '0')}`;
+        }, 1000);
+
+        let periodResults = {};
+
+        generateButton.addEventListener('click', () => {
+            const lottieContainer = document.createElement('div');
+            lottieContainer.style.position = 'fixed';
+            lottieContainer.style.top = '50%';
+            lottieContainer.style.left = '50%';
+            lottieContainer.style.transform = 'translate(-50%, -50%)';
+            lottieContainer.style.width = '200px';
+            lottieContainer.style.height = '200px';
+            document.body.appendChild(lottieContainer);
+
+            const animation = lottie.loadAnimation({
+                container: lottieContainer,
+                renderer: 'svg',
+                loop: false,
+                autoplay: true,
+                path: 'https://assets2.lottiefiles.com/packages/lf20_rnq6slxu.json'
+            });
+
+            animation.addEventListener('complete', () => {
+                document.body.removeChild(lottieContainer);
+                const result = Math.random() > 0.5 ? 'Big' : 'Small';
+                const period = textview4.textContent;
+
+                if (!periodResults[period]) {
+                    periodResults[period] = result;
+                    resultDiv.textContent = `Result: ${result}`;
+                    const historyItem = document.createElement('div');
+                    historyItem.textContent = `Period ${period}: ${result}`;
+                    historyDiv.appendChild(historyItem);
+                } else {
+                    alert('Result for this period has already been generated.');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
