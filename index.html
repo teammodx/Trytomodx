@@ -9,6 +9,7 @@
       margin: 0;
       overflow: hidden;
       font-family: Arial, sans-serif;
+      background-color: black; /* Background color set to black */
     }
     canvas {
       display: block;
@@ -18,15 +19,31 @@
       top: 10px;
       left: 10px;
       z-index: 10;
-      color: white;
+      color: red; /* Text color set to red */
     }
     #controls button, #controls div {
       margin-bottom: 10px;
     }
     #textview4, #textview6 {
-      color: white;
+      color: red; /* Text color set to red */
       font-size: 20px;
       margin-bottom: 10px;
+    }
+    #randomResult {
+      color: red; /* Text color set to red */
+      font-size: 20px;
+    }
+    #randomButton {
+      color: red; /* Button text color set to red */
+      background-color: black; /* Button background color set to black */
+      border: 1px solid red; /* Button border set to red */
+      padding: 5px 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #randomButton:hover {
+      background-color: red; /* Hover effect: background becomes red */
+      color: black; /* Hover effect: text becomes black */
     }
   </style>
 </head>
