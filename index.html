@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timer App</title>
+    <title>Timer with Results</title>
     <style>
         body {
             margin: 0;
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: radial-gradient(circle, rgba(255,215,0,0.8), rgba(0,0,0,0.9));
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.8), rgba(0, 0, 0, 0.9));
         }
 
         canvas {
@@ -28,53 +29,59 @@
             font-family: Arial, sans-serif;
         }
 
-        .timer-text {
-            font-size: 2em;
+        .text {
+            font-size: 1.8em;
             margin-bottom: 20px;
         }
 
-        .result-text {
-            font-size: 1.5em;
-            margin-bottom: 20px;
-        }
-
-        .history {
+        .button-container {
             margin-top: 20px;
         }
 
         button {
-            padding: 10px 20px;
+            padding: 15px 30px;
             font-size: 16px;
             background: gold;
-            border: none;
             color: black;
-            cursor: pointer;
+            border: none;
             border-radius: 5px;
+            cursor: pointer;
             transition: background 0.3s;
         }
 
         button:hover {
             background: darkgoldenrod;
         }
+
+        .history {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .history div {
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
     <canvas id="particles"></canvas>
     <div class="container">
-        <div id="textview4" class="timer-text"></div>
-        <div id="textview6" class="timer-text"></div>
-        <button id="generateResult">Generate Result</button>
-        <div id="result" class="result-text"></div>
-        <div class="history" id="history"></div>
+        <div id="textview4" class="text"></div>
+        <div id="textview6" class="text"></div>
+        <div class="button-container">
+            <button id="generateButton">Tap to Generate</button>
+        </div>
+        <div id="result" class="text"></div>
+        <div id="history" class="history"></div>
     </div>
 
-    <!-- Add Lottie Animation -->
+    <!-- Lottie Animation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.0/lottie.min.js"></script>
 
     <script>
-        // Particle Background
-        const canvas = document.getElementById('particles');
-        const ctx = canvas.getContext('2d');
+        // Particle Effect
+        const canvas = document.getElementById("particles");
+        const ctx = canvas.getContext("2d");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
@@ -92,7 +99,6 @@
             update() {
                 this.x += this.speedX;
                 this.y += this.speedY;
-
                 if (this.size > 0.2) this.size -= 0.1;
             }
             draw() {
@@ -135,7 +141,7 @@
             requestAnimationFrame(animate);
         }
 
-        window.addEventListener('click', () => {
+        window.addEventListener("click", () => {
             for (let i = 0; i < 10; i++) {
                 particlesArray.push(new Particle());
             }
@@ -143,12 +149,12 @@
 
         animate();
 
-        // Timer and Results Logic
-        const textview4 = document.getElementById('textview4');
-        const textview6 = document.getElementById('textview6');
-        const resultDiv = document.getElementById('result');
-        const historyDiv = document.getElementById('history');
-        const generateButton = document.getElementById('generateResult');
+        // Timer Logic
+        const textview4 = document.getElementById("textview4");
+        const textview6 = document.getElementById("textview6");
+        const resultDiv = document.getElementById("result");
+        const historyDiv = document.getElementById("history");
+        const generateButton = document.getElementById("generateButton");
 
         const timer = setInterval(() => {
             const calendar = new Date();
@@ -157,43 +163,44 @@
             const minutes = calendar.getMinutes();
             const totalMinutes = calendar.getHours() * 60 + minutes;
 
-            textview4.textContent = `${calendar.getFullYear()}${String(calendar.getMonth() + 1).padStart(2, '0')}${String(calendar.getDate()).padStart(2, '0')}1000${10001 + totalMinutes}`;
-            textview6.textContent = `   00  :  ${String(remainingSeconds).padStart(2, '0')}`;
+            textview4.textContent = `${calendar.getFullYear()}${String(calendar.getMonth() + 1).padStart(2, "0")}${String(calendar.getDate()).padStart(2, "0")}1000${10001 + totalMinutes}`;
+            textview6.textContent = `   00  :  ${String(remainingSeconds).padStart(2, "0")}`;
         }, 1000);
 
         let periodResults = {};
 
-        generateButton.addEventListener('click', () => {
-            const lottieContainer = document.createElement('div');
-            lottieContainer.style.position = 'fixed';
-            lottieContainer.style.top = '50%';
-            lottieContainer.style.left = '50%';
-            lottieContainer.style.transform = 'translate(-50%, -50%)';
-            lottieContainer.style.width = '200px';
-            lottieContainer.style.height = '200px';
+        // Generate Button Logic
+        generateButton.addEventListener("click", () => {
+            const lottieContainer = document.createElement("div");
+            lottieContainer.style.position = "fixed";
+            lottieContainer.style.top = "50%";
+            lottieContainer.style.left = "50%";
+            lottieContainer.style.transform = "translate(-50%, -50%)";
+            lottieContainer.style.width = "200px";
+            lottieContainer.style.height = "200px";
             document.body.appendChild(lottieContainer);
 
             const animation = lottie.loadAnimation({
                 container: lottieContainer,
-                renderer: 'svg',
+                renderer: "svg",
                 loop: false,
                 autoplay: true,
-                path: 'https://assets2.lottiefiles.com/packages/lf20_rnq6slxu.json'
+                path: "https://assets2.lottiefiles.com/packages/lf20_rnq6slxu.json"
             });
 
-            animation.addEventListener('complete', () => {
+            animation.addEventListener("complete", () => {
                 document.body.removeChild(lottieContainer);
-                const result = Math.random() > 0.5 ? 'Big' : 'Small';
+                const result = Math.random() > 0.5 ? "Big" : "Small";
                 const period = textview4.textContent;
 
                 if (!periodResults[period]) {
                     periodResults[period] = result;
                     resultDiv.textContent = `Result: ${result}`;
-                    const historyItem = document.createElement('div');
+                    const historyItem = document.createElement("div");
                     historyItem.textContent = `Period ${period}: ${result}`;
                     historyDiv.appendChild(historyItem);
                 } else {
-                    alert('Result for this period has already been generated.');
+                    alert("Result for this period has already been generated.");
                 }
             });
         });
